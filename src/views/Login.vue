@@ -1,7 +1,7 @@
 <script setup>
 import Header from '../components/header.vue'
 import { auth } from '../firebase'
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -25,6 +25,30 @@ async function login() {
         });
 }
 
+
+function signUpWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            // The signed-in user info.
+            const user = result.user;
+            // ...
+            router.push('/')
+        }).catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // The email of the user's account used.
+            const email = error.email;
+            // The AuthCredential type that was used.
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            // ...
+        });
+}
+
 onMounted(() => {
     if (auth.currentUser) {
         router.push('/')
@@ -45,6 +69,8 @@ onMounted(() => {
                 v-model="passInput" />
             <button class="my-3 p-2 rounded-sm bg-blue-500 text-white hover:bg-white hover:text-blue-500" type="submit"
                 @click="login">Log in</button>
+            <button class="p-2 rounded-sm bg-white text-black" @click="signUpWithGoogle">Log in with
+                Google</button>
 
         </form>
     </div>

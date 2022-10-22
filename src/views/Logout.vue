@@ -6,7 +6,6 @@ const router = useRouter()
 
 signOut(auth).then(() => {
     // Sign-out successful.
-    console.log("signed out")
     router.push('/login')
 }).catch((error) => {
     // An error happened.

@@ -12,7 +12,6 @@ let uid = ref(null);
 onAuthStateChanged(auth, (user) => {
     if (user) {
         uid = user.uid;
-        console.log(uid);
         const q = query(collection(db, "todos"), where("createdBy", "==", uid));
         onSnapshot(q, (querySnapshot) => {
             let fbTodos = [];
@@ -25,7 +24,6 @@ onAuthStateChanged(auth, (user) => {
                 fbTodos.push({ todo, id, createdBy, time, done });
             });
             todos.value = fbTodos;
-            console.log(todos.value)
         });
 
     }
@@ -43,7 +41,6 @@ async function addTodo() {
         time: currentTime,
         createdBy: uid
     });
-    console.log("Document written with ID: ", docRef.id);
     todoInput.value = "";
 }
 

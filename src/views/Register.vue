@@ -2,7 +2,7 @@
 import Header from '../components/header.vue'
 import { ref, onMounted } from 'vue'
 import { auth } from '../firebase'
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useRouter } from 'vue-router'
 
 let emailInput = ref('')
@@ -52,17 +52,38 @@ function register() {
                 // Signed in 
                 const user = auth.currentUser;
                 // ...
-                // router.push('/home')
-                console.log(auth.currentUser)
+                router.push('/')
             })
             .catch((error) => {
                 const errorCode = error.code
                 const errorMessage = error.message
-                console.log(errorCode, errorMessage)
             });
     } else {
         returnMsg.value = "Please enter a valid email and password"
     }
+}
+
+function signUpWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            // The signed-in user info.
+            const user = result.user;
+            // ...
+            router.push('/')
+        }).catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // The email of the user's account used.
+            const email = error.email;
+            // The AuthCredential type that was used.
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            // ...
+        });
 }
 
 </script>
