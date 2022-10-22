@@ -1,59 +1,91 @@
-<script>
-export default {
-    name: 'Todo',
-    data() {
-        return {
-            todos: [],
-        }
-    },
-    methods: {
-        addTodo() {
-            if (this.todo != "") {
-                this.todos.push({
-                    id: this.todos.length + 1,
-                    title: this.todo,
-                    completed: false,
-                    created: new Date().toLocaleString().replace(/(.*)\D\d+/, '$1')
-                });
-                this.todo = "";
-            }
+<script setup>
+import { onMounted, ref } from 'vue'
+import { onSnapshot, collection, addDoc, doc, updateDoc, deleteDoc, where, query } from "firebase/firestore";
+import { db, auth } from '../firebase';
+import { onAuthStateChanged } from "firebase/auth";
 
-        },
-        removeTodo(id) {
-            this.todos = this.todos.filter(todo => todo.id !== id);
-        },
-        doneTodo(id) {
-            this.todos = this.todos.map(todo => {
-                if (todo.id === id) {
-                    todo.completed = !todo.completed;
-                }
-                return todo;
+let todos = ref([]);
+let todoInput = ref('');
+
+let uid = ref(null);
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        uid = user.uid;
+        console.log(uid);
+        const q = query(collection(db, "todos"), where("createdBy", "==", uid));
+        onSnapshot(q, (querySnapshot) => {
+            let fbTodos = [];
+            querySnapshot.forEach((doc) => {
+                let todo = doc.data().todo;
+                let id = doc.id;
+                let createdBy = doc.data().createdBy;
+                let time = doc.data().time;
+                let done = doc.data().done;
+                fbTodos.push({ todo, id, createdBy, time, done });
+            });
+            todos.value = fbTodos;
+            console.log(todos.value)
+        });
+
+    }
+});
+
+onMounted(async () => {
+
+});
+
+async function addTodo() {
+    let currentTime = new Date().toLocaleString().replace(/(.*)\D\d+/, '$1');
+    const docRef = await addDoc(collection(db, "todos"), {
+        todo: todoInput.value,
+        done: false,
+        time: currentTime,
+        createdBy: uid
+    });
+    console.log("Document written with ID: ", docRef.id);
+    todoInput.value = "";
+}
+
+async function doneTodo(id) {
+    todos.value.forEach(async (todo) => {
+        if (todo.id === id) {
+            todo.done = !todo.done;
+            await updateDoc(doc(db, "todos", id), {
+                done: todo.done
             });
         }
-
-    },
+    });
 }
+
+async function removeTodo(id) {
+    await deleteDoc(doc(db, "todos", id));
+}
+
+
+
 </script>
 
 <template>
     <div class="flex justify-center w-full">
-        <div id="todo-div" class="flex items-center justify-center p-5 w-2/3">
-            <input id="todo-input" class="text-black w-3/5 p-2 rounded-md" type="text" v-model="todo"
-                placeholder="What to do..." />
-            <button id="add-todo-button" class="bg-gray-500 w-1/5 ml-2 p-2" @click="addTodo">Add</button>
+        <div id="todo-div" class="flex items-center justify-center p-5 w-4/5">
+            <form class="flex w-2/3" v-on:submit.prevent="addTodo">
+                <input id="todo-input" class="text-black w-4/5 p-2 rounded-md" type="text" v-model="todoInput"
+                    placeholder="What to do..." />
+                <button id="add-todo-button" class="bg-gray-500 w-1/5 ml-2 p-2">Add</button>
+            </form>
         </div>
     </div>
 
     <div class="flex justify-center m-auto w-full">
         <ul class="w-4/5">
             <li id="todo-item" class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md"
-                :class="{ 'bg-green-800 bg-opacity-40': todo.completed }" v-for="todo in todos" :key="todo.id"
-                :id="todo.id">
+                :class="{ 'bg-green-800 bg-opacity-40': todo.done }" v-for="todo in todos" :key="todo.id" :id="todo.id">
                 <div>
-                    <p class="text-lg" :class="[todo.completed === true ? 'line-through' : '']">
-                        {{todo.title}}
+                    <p class="text-lg" :class="[todo.done === true ? 'line-through' : '']">
+                        {{todo.todo}}
                     </p>
-                    <p class="text-xs text-slate-500">{{todo.created}}</p>
+                    <p class="text-xs text-slate-500">{{todo.time}}</p>
                 </div>
                 <div class="flex no-wrap">
                     <button class="bg-green-800 p-2 h-fit mr-2" @click="doneTodo(todo.id)">&check;</button>
@@ -83,7 +115,7 @@ export default {
 
     /*Tablets [601px -> 1200px]*/
     #todo-div {
-        width: 70%;
+        width: 100%;
     }
 
     #todo-input {
@@ -104,21 +136,29 @@ export default {
         width: 100%;
     }
 
+    form {
+        width: 90;
+    }
+
     #add-todo-button {
         width: 20%;
     }
 }
 
-@media only screen and (max-width: 425px) {
+@media only screen and (max-width: 525px) {
 
     /*Small smartphones [325px -> 425px]*/
     #todo-div {
-        width: 90%;
+        width: 100%;
     }
 
     #todo-input {
         /*width: 100%;*/
         width: 100%;
+    }
+
+    form {
+        width: 95%;
     }
 }
 </style>

@@ -1,13 +1,18 @@
 <script setup>
 import Header from "./components/header.vue";
 import Counter from './components/counter.vue'
-import Todo from './components/todo.vue'
+
+import Nav from './components/nav.vue'
 
 </script>
 
 <template>
-  <Header title="Todos" />
-  <Todo />
+  <div>
+    <Nav />
+  </div>
+  <router-view />
+  <!-- <Header title="Gotta Do" />
+  <Todo /> -->
 
 </template>
 
