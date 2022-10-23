@@ -1,4 +1,5 @@
 <script setup>
+import Counter from './counter.vue'
 import { onMounted, ref } from 'vue'
 import { onSnapshot, collection, addDoc, doc, updateDoc, deleteDoc, where, query } from "firebase/firestore";
 import { db, auth } from '../firebase';
@@ -6,6 +7,10 @@ import { onAuthStateChanged } from "firebase/auth";
 
 let todos = ref([]);
 let todoInput = ref('');
+let todosCount = ref(0);
+let message = ref('Still gotta do ')
+let sentenceEnd = ref('');
+
 
 let uid = ref(null);
 
@@ -24,6 +29,20 @@ onAuthStateChanged(auth, (user) => {
                 fbTodos.push({ todo, id, createdBy, time, done });
             });
             todos.value = fbTodos;
+            todosCount.value = fbTodos.filter(todo => todo.done === false).length;
+            if (todosCount.value === 1) {
+                sentenceEnd.value = "thing😊"
+                message.value = "Gotta do "
+            }
+            else if (todosCount.value === 0) {
+                sentenceEnd.value = ""
+                message.value = "You're all done!"
+            }
+            else {
+                sentenceEnd.value = "things🙁"
+                message.value = "Still gotta do "
+            }
+
         });
 
     }
@@ -68,21 +87,24 @@ async function removeTodo(id) {
         <div id="todo-div" class="flex items-center justify-center p-5 w-4/5">
             <form class="flex w-2/3" v-on:submit.prevent="addTodo">
                 <input id="todo-input" class="text-black w-4/5 p-2 rounded-md" type="text" v-model="todoInput"
-                    placeholder="What to do..." />
+                    placeholder="What to do..." autocomplete="offgit " />
                 <button id="add-todo-button" class="bg-gray-500 w-1/5 ml-2 p-2">Add</button>
             </form>
         </div>
     </div>
-
+    <div class="flex justify-center p-1 m-1 text-lg">
+        <Counter :count="todosCount" :message="message" :sentenceEnd="sentenceEnd" />
+    </div>
     <div class="flex justify-center m-auto w-full">
+
         <ul class="w-4/5">
             <li id="todo-item" class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md"
                 :class="{ 'bg-green-800 bg-opacity-40': todo.done }" v-for="todo in todos" :key="todo.id" :id="todo.id">
                 <div>
                     <p class="text-lg" :class="[todo.done === true ? 'line-through' : '']">
-                        {{todo.todo}}
+                        {{ todo.todo }}
                     </p>
-                    <p class="text-xs text-slate-500">{{todo.time}}</p>
+                    <p class="text-xs text-slate-500">{{ todo.time }}</p>
                 </div>
                 <div class="flex no-wrap">
                     <button class="bg-green-800 p-2 h-fit mr-2" @click="doneTodo(todo.id)">&check;</button>
