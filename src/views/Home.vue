@@ -27,7 +27,7 @@ onAuthStateChanged(auth, (user) => {
 </script>
 
 <template>
-    <Header title="Homepage" />
+    <Header title="Gotta Do!" />
     <Todo />
 
 </template>
