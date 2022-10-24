@@ -87,7 +87,7 @@ async function removeTodo(id) {
         <div id="todo-div" class="flex items-center justify-center p-5 w-4/5">
             <form class="flex w-2/3" v-on:submit.prevent="addTodo">
                 <input id="todo-input" class="text-black w-4/5 p-2 rounded-md" type="text" v-model="todoInput"
-                    placeholder="What to do..." autocomplete="offgit " />
+                    placeholder="What to do..." autocomplete="offgit npm " />
                 <button id="add-todo-button" class="bg-gray-500 w-1/5 ml-2 p-2">Add</button>
             </form>
         </div>
@@ -98,8 +98,10 @@ async function removeTodo(id) {
     <div class="flex justify-center m-auto w-full">
 
         <ul class="w-4/5">
-            <li id="todo-item" class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md"
-                :class="{ 'bg-green-800 bg-opacity-40': todo.done }" v-for="todo in todos" :key="todo.id" :id="todo.id">
+            <li id="todo-item"
+                class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md cursor-default"
+                :class="{ 'bg-green-800 bg-opacity-40': todo.done }" v-for="todo in todos" :key="todo.id" :id="todo.id"
+                @click="doneTodo(todo.id)">
                 <div>
                     <p class="text-lg" :class="[todo.done === true ? 'line-through' : '']">
                         {{ todo.todo }}
@@ -107,8 +109,8 @@ async function removeTodo(id) {
                     <p class="text-xs text-slate-500">{{ todo.time }}</p>
                 </div>
                 <div class="flex no-wrap">
-                    <button class="bg-green-800 p-2 h-fit mr-2" @click="doneTodo(todo.id)">&check;</button>
-                    <button class="bg-red-800 p-2 h-fit" @click="removeTodo(todo.id)">&times;</button>
+                    <!-- <button class="bg-green-800 p-2 h-fit mr-2" @click="doneTodo(todo.id)">&check;</button> -->
+                    <button class="bg-red-800 p-2 h-fit w-10" @click="removeTodo(todo.id)">&times;</button>
                 </div>
             </li>
         </ul>
@@ -124,11 +126,22 @@ async function removeTodo(id) {
     box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
     -webkit-box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
     -moz-box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
+    animation: slideFromLeft 0.5s ease-in-out;
 }
 
-#todo-item:hover {
-    transform: scale(1.02);
+
+@keyframes slideFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
+
 
 @media only screen and (max-width: 1200px) {
 
