@@ -1,7 +1,7 @@
 <script setup>
 import Header from '../components/header.vue'
 import { auth } from '../firebase'
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -49,10 +49,20 @@ function signUpWithGoogle() {
         });
 }
 
+
 onMounted(() => {
-    if (auth.currentUser) {
-        router.push('/')
-    }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            router.push('/')
+            // ...
+        } else {
+            // User is signed out
+            // ...
+
+        }
+    });
 });
 </script>
 

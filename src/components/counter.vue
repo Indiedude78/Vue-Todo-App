@@ -18,7 +18,7 @@ const props = defineProps({
 
 <template>
     <div>
-        <p>{{ message }} <span :class="color" v-if="count > 0">{{ count }}</span> {{ sentenceEnd }}</p>
+        <p>{{ message }} <span v-if="count > 0">{{ count }}</span> {{ sentenceEnd }}</p>
     </div>
 </template>
 

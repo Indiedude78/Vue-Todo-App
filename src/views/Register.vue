@@ -2,7 +2,7 @@
 import Header from '../components/header.vue'
 import { ref, onMounted } from 'vue'
 import { auth } from '../firebase'
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from 'vue-router'
 
 let emailInput = ref('')
@@ -12,9 +12,18 @@ let returnMsg = ref('')
 const router = useRouter()
 
 onMounted(() => {
-    if (auth.currentUser) {
-        router.push('/')
-    }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            router.push('/')
+            // ...
+        } else {
+            // User is signed out
+            // ...
+
+        }
+    });
 });
 
 //function to check if email is valid
@@ -110,13 +119,13 @@ function signUpWithGoogle() {
     </div>
     <div class="flex justify-center my-1">
         <div class="m-3 p-2 bg-slate-900 w-fit flex flex-col">
-            <p class="text-white" :class="[validateEmail(emailInput)===true ? 'text-green-300' : 'text-white' ]">
+            <p class="text-white" :class="[validateEmail(emailInput) === true ? 'text-green-300' : 'text-white']">
                 &check; Email is valid
             </p>
-            <p :class="[validatePassLength(passInput)===true ? 'text-green-300' : 'text-white' ]">&check; Password is
+            <p :class="[validatePassLength(passInput) === true ? 'text-green-300' : 'text-white']">&check; Password is
                 atleast 8
                 characters</p>
-            <p :class="[validatePassMatch(passInput, confirmPassInput)===true ? 'text-green-300' : 'text-white' ]">
+            <p :class="[validatePassMatch(passInput, confirmPassInput) === true ? 'text-green-300' : 'text-white']">
                 &check;
                 Passwords
                 match</p>

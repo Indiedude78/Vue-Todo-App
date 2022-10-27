@@ -17,7 +17,7 @@ export default {
 
 <template>
     <header class="p-2 m-auto">
-        <h1 class="text-white text-4xl underline mb-1">{{titleToUpperCase()}}</h1>
+        <h1 class="text-white text-4xl underline mb-1">{{ titleToUpperCase() }}</h1>
     </header>
 </template>
 

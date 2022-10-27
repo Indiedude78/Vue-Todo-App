@@ -53,14 +53,17 @@ onMounted(async () => {
 });
 
 async function addTodo() {
-    let currentTime = new Date().toLocaleString().replace(/(.*)\D\d+/, '$1');
-    const docRef = await addDoc(collection(db, "todos"), {
-        todo: todoInput.value,
-        done: false,
-        time: currentTime,
-        createdBy: uid
-    });
-    todoInput.value = "";
+    if (todoInput.value !== '') {
+
+        let currentTime = new Date().toLocaleString().replace(/(.*)\D\d+/, '$1');
+        const docRef = await addDoc(collection(db, "todos"), {
+            todo: todoInput.value,
+            done: false,
+            time: currentTime,
+            createdBy: uid
+        });
+        todoInput.value = "";
+    }
 }
 
 async function doneTodo(id) {
@@ -70,6 +73,11 @@ async function doneTodo(id) {
             await updateDoc(doc(db, "todos", id), {
                 done: todo.done
             });
+            setTimeout(() => {
+                if (todo.done === true) {
+                    removeTodo(todo.id)
+                }
+            }, 750);
         }
     });
 }
@@ -79,7 +87,6 @@ async function removeTodo(id) {
 }
 
 
-
 </script>
 
 <template>
@@ -87,7 +94,7 @@ async function removeTodo(id) {
         <div id="todo-div" class="flex items-center justify-center p-5 w-4/5">
             <form class="flex w-2/3" v-on:submit.prevent="addTodo">
                 <input id="todo-input" class="text-black w-4/5 p-2 rounded-md" type="text" v-model="todoInput"
-                    placeholder="What to do..." autocomplete="offgit npm " />
+                    placeholder="What to do..." autocomplete="off" />
                 <button id="add-todo-button" class="bg-gray-500 w-1/5 ml-2 p-2">Add</button>
             </form>
         </div>
@@ -97,11 +104,11 @@ async function removeTodo(id) {
     </div>
     <div class="flex justify-center m-auto w-full">
 
-        <ul class="w-4/5">
+        <ul class="w-4/6">
             <li id="todo-item"
-                class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md cursor-default"
-                :class="{ 'bg-green-800 bg-opacity-40': todo.done }" v-for="todo in todos" :key="todo.id" :id="todo.id"
-                @click="doneTodo(todo.id)">
+                class="flex justify-between items-center bg-slate-400 bg-opacity-30 p-3 mb-3 rounded-md cursor-default animate-start"
+                :class="{ 'bg-green-800 bg-opacity-40 animate-done': todo.done }" v-for="todo in todos" :key="todo.id"
+                :id="todo.id" @click="doneTodo(todo.id)">
                 <div>
                     <p class="text-lg" :class="[todo.done === true ? 'line-through' : '']">
                         {{ todo.todo }}
@@ -126,9 +133,16 @@ async function removeTodo(id) {
     box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
     -webkit-box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
     -moz-box-shadow: -2px 3px 9px -3px rgba(196, 196, 196, 0.36);
-    animation: slideFromLeft 0.5s ease-in-out;
+
 }
 
+.animate-start {
+    animation: slideFromLeft 0.8s ease-in-out;
+}
+
+.animate-done {
+    animation: backOutDown 1s ease-in;
+}
 
 @keyframes slideFromLeft {
     0% {
@@ -139,6 +153,19 @@ async function removeTodo(id) {
     100% {
         opacity: 1;
         transform: translateX(0);
+    }
+}
+
+@keyframes backOutDown {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(110%);
+        visibility: hidden;
     }
 }
 
